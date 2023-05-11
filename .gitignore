@@ -1,53 +1,17 @@
-index.html
-index.js
-package.html
-lib
-site/
-docs/_build/
-.cluster_id
+# .gitignore
 
-project/boot
-project/plugins/project
-project/plugins/target
-project/target
-target
-.ensime
-\#*#
-*~
-.#*
-.lib
-*.aux.xml
-*.jar
-*.crc
-_SUCCESS
-
-*.pyc
-.project
-.classpath
-.cache
-.settings
-.history
-.idea
-.vscode
-.DS_Store
-*.iml
-*.swp
-*.swo
-*.sublime-*
-.metals/
+# Build and dependency management directories
 project/
+target/
+
+# IDE-specific directories
 .bloop/
-.bsp/
+.metals/
 
-lib
-index.html
-index.js
-.ensime*
+# Optional: Uncomment the line below if you use IntelliJ IDEA
+#.idea/
 
-nohup.out
-
-derby.log
-metastore_db/
-*.log
-*.tsv
-*.csv
+# Optional: Uncomment the line below if you use Eclipse
+#.classpath
+#.project
+#.settings/
