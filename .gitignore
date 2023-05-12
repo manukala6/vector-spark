@@ -1,12 +1,17 @@
 # .gitignore
 
 # Build and dependency management directories
-project/
-target/
+project/boot
+project/plugins/project
+project/plugins/target
+project/target
+/project
+target
 
 # IDE-specific directories
 .bloop/
 .metals/
+.vscode/
 
 # Optional: Uncomment the line below if you use IntelliJ IDEA
 #.idea/
