@@ -11,4 +11,6 @@ libraryDependencies ++= Seq(
   "org.locationtech.geotrellis" %% "geotrellis-vector" % "3.6.0",
   "org.locationtech.geotrellis" %% "geotrellis-s3" % "3.6.0",
   "org.locationtech.geotrellis" %% "geotrellis-raster" % "3.6.0",
+  "software.amazon.awssdk" % "s3" % "2.17.89",
+  "org.apache.hadoop" % "hadoop-aws" % "3.3.1"
 )
