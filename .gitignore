@@ -5,6 +5,7 @@ project/boot
 project/plugins/project
 project/plugins/target
 project/target
+data
 /project
 target
 

@@ -2,15 +2,27 @@ name := "vector-spark"
 version := "0.1"
 scalaVersion := "2.12.17"
 
+val SparkVersion = "3.3.1"
+val SparkCompatibleVersion = "3.0"
+val HadoopVersion = "2.7.2"
+val SedonaVersion = "1.4.0"
+val ScalaCompatibleVersion = "2.12"
+val GeoTrellisVersion = "3.6.0"
+
+// Change the dependency scope to "provided" when you run "sbt assembly"
+val dependencyScope = "compile"
+val geotoolsVersion = "1.4.0-28.2"
+
 libraryDependencies ++= Seq(
-  "org.locationtech.geotrellis" %% "geotrellis-spark" % "3.6.0",
-  "org.locationtech.geomesa" %% "geomesa-spark-jts" % "3.3.0",
-  "org.apache.spark" %% "spark-core" % "3.3.0",
-  "org.apache.spark" %% "spark-sql" % "3.3.0",
-  "org.apache.spark" %% "spark-mllib" % "3.3.0",
-  "org.locationtech.geotrellis" %% "geotrellis-vector" % "3.6.0",
-  "org.locationtech.geotrellis" %% "geotrellis-s3" % "3.6.0",
-  "org.locationtech.geotrellis" %% "geotrellis-raster" % "3.6.0",
+  "org.apache.spark" %% "spark-core" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
+  "org.apache.spark" %% "spark-sql" % SparkVersion % dependencyScope exclude("org.apache.hadoop", "*"),
+  "org.apache.hadoop" % "hadoop-mapreduce-client-core" % HadoopVersion % dependencyScope,
+  "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
+  "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
+  "org.apache.sedona" % "sedona-spark-shaded-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
+  "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
+  "org.locationtech.geotrellis" %% "geotrellis-spark" % GeoTrellisVersion % dependencyScope,
+  "org.locationtech.geotrellis" %% "geotrellis-vector" % GeoTrellisVersion % dependencyScope,
+  "org.locationtech.geotrellis" %% "geotrellis-s3" % GeoTrellisVersion  % dependencyScope,
   "software.amazon.awssdk" % "s3" % "2.17.89",
-  "org.apache.hadoop" % "hadoop-aws" % "3.3.1"
 )
