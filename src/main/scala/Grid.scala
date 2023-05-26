@@ -1,7 +1,8 @@
 import org.apache.sedona.core.spatialRDD.SpatialRDD
 import org.locationtech.jts.geom.{Coordinate, Envelope, GeometryFactory, Polygon}
 
-import SparkSetup._
+import Spark.spark
+import org.apache.spark.SparkContext
 
 object Grid {
 
@@ -25,7 +26,7 @@ object Grid {
         }
 
         val gridRDD = new SpatialRDD[Polygon]
-        val sc = session.sparkContext
+        val sc: SparkContext = spark.sparkContext
         gridRDD.rawSpatialRDD = sc.parallelize(gridPolys)
         gridRDD.analyze()
 
@@ -47,7 +48,7 @@ object Grid {
         }
 
         val gridRDD = new SpatialRDD[Polygon]
-        val sc = session.sparkContext
+        val sc: SparkContext = spark.sparkContext
         gridRDD.rawSpatialRDD = sc.parallelize(gridPolys)
         gridRDD.analyze()
 
@@ -69,7 +70,7 @@ object Grid {
         }
 
         val gridRDD = new SpatialRDD[Polygon]
-        val sc = session.sparkContext
+        val sc: SparkContext = spark.sparkContext
         gridRDD.rawSpatialRDD = sc.parallelize(gridPolys)
         gridRDD.analyze()
 

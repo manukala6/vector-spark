@@ -1,9 +1,11 @@
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.serializer.KryoSerializer
 import org.apache.sedona.core.serde.SedonaKryoRegistrator
+import org.apache.sedona.sql.utils.SedonaSQLRegistrator
 
-object SparkSetup {
-  lazy val session: SparkSession = 
+
+object Spark {
+  lazy val spark: SparkSession = 
     SparkSession.builder()
       .appName("vector-spark")
       .master("local[*]")
@@ -11,4 +13,5 @@ object SparkSetup {
       .config("spark.kryo.registrator", classOf[SedonaKryoRegistrator].getName)
       .getOrCreate()
   
+  SedonaSQLRegistrator.registerAll(spark)
 }

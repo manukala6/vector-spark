@@ -4,7 +4,7 @@ scalaVersion := "2.12.17"
 
 val SparkVersion = "3.3.1"
 val SparkCompatibleVersion = "3.0"
-val HadoopVersion = "2.7.2"
+val HadoopVersion = "3.2.2"
 val SedonaVersion = "1.4.0"
 val ScalaCompatibleVersion = "2.12"
 val GeoTrellisVersion = "3.6.0"
@@ -20,9 +20,12 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-common" % HadoopVersion % dependencyScope,
   "org.apache.hadoop" % "hadoop-hdfs" % HadoopVersion % dependencyScope,
   "org.apache.sedona" % "sedona-spark-shaded-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
+  "org.apache.sedona" % "sedona-core-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
+  "org.apache.sedona" % "sedona-sql-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
   "org.apache.sedona" % "sedona-viz-".concat(SparkCompatibleVersion).concat("_").concat(ScalaCompatibleVersion) % SedonaVersion changing(),
   "org.locationtech.geotrellis" %% "geotrellis-spark" % GeoTrellisVersion % dependencyScope,
   "org.locationtech.geotrellis" %% "geotrellis-vector" % GeoTrellisVersion % dependencyScope,
   "org.locationtech.geotrellis" %% "geotrellis-s3" % GeoTrellisVersion  % dependencyScope,
+  "org.datasyslab" % "geotools-wrapper" % geotoolsVersion % "compile",
   "software.amazon.awssdk" % "s3" % "2.17.89",
 )

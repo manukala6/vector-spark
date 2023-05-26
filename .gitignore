@@ -8,6 +8,8 @@ project/target
 data
 /project
 target
+.bsp
+output
 
 # IDE-specific directories
 .bloop/
