@@ -76,4 +76,26 @@ object Grid {
 
         gridRDD
     }
+
+    def generate20x20(): SpatialRDD[Polygon] = {
+
+        val coords = for {
+            x <- minLong to maxLong by 20.0
+            y <- minLat to maxLat by 20.0
+        } yield (x, y)
+        
+        val geometryFactory = new GeometryFactory()
+        val gridPolys = coords.map { case (x, y) => 
+            val envelope = new Envelope(x, x + 20, y, y + 20)
+            val poly = geometryFactory.toGeometry(envelope).asInstanceOf[Polygon]
+            poly    
+        }
+
+        val gridRDD = new SpatialRDD[Polygon]
+        val sc: SparkContext = spark.sparkContext
+        gridRDD.rawSpatialRDD = sc.parallelize(gridPolys)
+        gridRDD.analyze()
+
+        gridRDD
+    }
 }
