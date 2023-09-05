@@ -10,6 +10,7 @@ import org.apache.sedona.core.spatialOperator.JoinQuery
 import org.apache.sedona.core.enums.IndexType
 import cats.instances.int
 import org.apache.sedona.core._
+
 object Main {
 
     def main(args: Array[String]): Unit = {
@@ -17,32 +18,45 @@ object Main {
         // Input file URI
         //println("Input file URI: ")
         //val input_file: String = scala.io.StdIn.readLine()
-        val input_file: String = "data\\gadm41_BRA_2"
+        val input_file: String = "data\nems_slim.csv"
 
-        // Read in geospatial data
 
         // Set up spark session
         val sc: SparkContext = spark.sparkContext
         val allowTopologyInvalidGeometries = true
         val skipSyntaxInvalidGeometries = false
         val spatialRDD: SpatialRDD[Geometry] = ShapefileReader.readToGeometryRDD(sc, input_file)
-
+        
+        // Read in geospatial data
+        val df = spark.read.option("header", "true").csv(input_file)
+        
         println("Number of records: " + spatialRDD.rawSpatialRDD.count())
 
+        // Convert latitude and longitude into Point geometry and add as new column
+        val spatialDf = df.withColumn(
+            "geometry",
+            Adapter.toGeometry(
+                new GeometryFactory().createPoint(
+                    new Coordinate(
+                        df("decimalLongitude").toDouble,
+                        df("decimalLatitude").toDouble
+                    )
+                )
+            )
+        )
+
         // convert rdd to dataframe
-        var spatialDf = Adapter.toDf(spatialRDD, spark)
+        //var spatialDf = Adapter.toDf(spatialRDD, spark)
 
-        // filter to Amazonas
-        spatialDf = spatialDf.filter("NAME_1 = 'Amazonas'")
         // print number of rows
-        println("Number of records in Amazonas: " + spatialDf.count())
+        println("Number of points: " + spatialDf.count())
 
-        // Make 1x1 grid
+        // Make 20x20 grid
         val gridRDD: SpatialRDD[Polygon] = Grid.generate1x1()
         val gridHeadRecs: List[Polygon] = gridRDD.rawSpatialRDD.take(2).asScala.toList
         gridHeadRecs.foreach(println)
 
-        // Join grid to Amazonas data
+        /*
         gridRDD.analyze()
         gridRDD.spatialPartitioning(GridType.KDBTREE)
         gridRDD.buildIndex(IndexType.RTREE, true)
@@ -64,7 +78,7 @@ object Main {
         val intersectedDF = Adapter.toDf(intersectedRDD, spark)
         intersectedDF.write.format("geoparquet").save("output\\amazonas_1x1_grid")
 
-
+        */
 
         sc.stop()
     }
