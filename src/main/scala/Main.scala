@@ -12,6 +12,9 @@ import org.apache.sedona.core.enums.GridType
 import org.apache.sedona.core.enums.IndexType
 import cats.instances.tuple
 import org.apache.sedona.sql.utils.SedonaSQLRegistrator
+import org.locationtech.jts.io.WKTWriter
+import org.apache.spark.rdd.RDD
+import org.apache.sedona.core.formatMapper.WktReader
 
 
 object Main {
@@ -19,30 +22,31 @@ object Main {
     def main(args: Array[String]): Unit = {
 
         // Input file URI
-        val input_file: String = "data//nems_slim.tsv"
+        val input_file: String = "data//OBIS_anemone_occurrences_slim.tsv"
 
         // Set up spark session
         val sc: SparkContext = spark.sparkContext
+        val wktColumn = 2
         val allowTopologyInvalidGeometries = true
         val skipSyntaxInvalidGeometries = false
         sc.setLogLevel("ERROR")
         SedonaSQLRegistrator.registerAll(spark)
-        
+
         // Read points from TSV
         val rawDf = spark.read
             .format("csv")
             .option("header", "true")
             .option("delimiter", "\t")
             .load(input_file)
-        val spatialDf = rawDf.withColumn("geom", expr("ST_Point(CAST(`decimalLongitude` AS Decimal(24,20)), CAST(`decimalLatitude` AS Decimal(24,20)))"))
+        val spatialDf = rawDf.withColumn("geometry", expr("ST_GeomFromWKT(geometry)"))
         println("First five rows of spatialDf: " + spatialDf.show(5))
-        println("Number of points: " + rawDf.count())
+        println("Number of points: " + spatialDf.count())
 
         // Convert to spatial RDD
-        val spatialRDD = Adapter.toSpatialRdd(spatialDf, "geom")
+        val spatialRDD = Adapter.toSpatialRdd(spatialDf, "geometry")
 
-        // Generate 20x20 grid
-        val gridRDD = Grid.generate20x20()
+        // Generate 1x1 grid
+        val gridRDD = Grid.generate1x1()
         println("Number of grid cells: " + gridRDD.countWithoutDuplicates())
 
         val gridHeadRecs: List[Polygon] = gridRDD.rawSpatialRDD.take(10).asScala.toList
@@ -55,27 +59,34 @@ object Main {
 
         spatialRDD.analyze()        
         spatialRDD.spatialPartitioning(gridRDD.getPartitioner)
+
+        // print first five elements of spatialRDD
+        val spatialHeadRecs: List[Geometry] = spatialRDD.rawSpatialRDD.take(10).asScala.toList
+        spatialHeadRecs.foreach(println)
         
         // Perform spatial join
-        val result = JoinQuery.SpatialJoinQuery(spatialRDD, gridRDD, true, true)
+        val resultRDD = JoinQuery.SpatialJoinQuery(spatialRDD, gridRDD, true, true)
 
         // Group by polygon and count points
-        val counts = result.rdd
-            .map(tuple => (tuple._2, 1))
-            .reduceByKey(_ + _)
-        println("Number of grid cells with points: " + counts.count())
-        println("First five rows of counts: " + counts.take(5).toList)
+        val countRDD = resultRDD.rdd
+            .map { case (polygon, pointList) => (polygon, pointList.size()) }
+        println("Number of grid cells with points: " + countRDD.count())
+        println("First five rows of counts: " + countRDD.take(5).toList)
 
-        // Convert to dataframe
-        val countDf = counts.map {
-            case (polygon, count) => (polygon, count)
-        }.toDF("geometry", "count")
+        //val countDF = Adapter.toDf(spatialRDD, spark)
+        val countDF = countRDD.map {
+            case (polygon: Polygon, count: Int) => 
+                val wkt = new WKTWriter().write(polygon)
+                s"$wkt\t$count"  // TSV format (tab-separated)
+        }
+
+        println("First five rows of countsDF: " + countRDD.take(5).toList)
+
+        // Write to CSV
+        countDF.coalesce(1).saveAsTextFile("output//joined_grid_11.tsv")
 
         // Write to shapefile
-        countDf.write
-            .format("shapefile")
-            .option("header", "true")
-            .save("data//nems_slim_grid_20x20.shp")
+        //countDF.write.format("geoparquet").save("output//joined_grid_5.parquet")
 
         sc.stop()
     }

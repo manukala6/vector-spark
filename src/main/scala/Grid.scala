@@ -20,13 +20,13 @@ object Grid {
             y <- minLat until maxLat by 1.0
         } yield (x, y)
         
-        val geometryFactory = new GeometryFactory()
-        val gridPolys = coords.map { case (x, y) => 
+        val geometryFactory = new GeometryFactory(new PrecisionModel(), srid)
+        val gridPolys = coords.flatMap { case (x, y) => 
             val envelope = new Envelope(x, x + 1, y, y + 1)
             val poly = geometryFactory.toGeometry(envelope).asInstanceOf[Polygon]
-            poly    
+            Some(poly)    
         }
-
+        
         val gridRDD = new SpatialRDD[Polygon]
         val sc: SparkContext = spark.sparkContext
         gridRDD.rawSpatialRDD = sc.parallelize(gridPolys)
@@ -86,6 +86,28 @@ object Grid {
             y <- minLat until maxLat by 20.0
         } yield (x, y)
         
+        val geometryFactory = new GeometryFactory(new PrecisionModel(), srid)
+        val gridPolys = coords.flatMap { case (x, y) => 
+            val envelope = new Envelope(x, x + 20, y, y + 20)
+            val poly = geometryFactory.toGeometry(envelope).asInstanceOf[Polygon]
+            Some(poly)    
+        }
+        
+        val gridRDD = new SpatialRDD[Polygon]
+        val sc: SparkContext = spark.sparkContext
+        gridRDD.rawSpatialRDD = sc.parallelize(gridPolys)
+        gridRDD.analyze()
+
+        gridRDD
+    }
+
+    def generate10band(): SpatialRDD[Polygon] = {
+
+        val coords = for {
+            x <- -180.0 until 180.0 by 180.0
+            y <- -80.0 until 80.0 by 10.0
+        } yield (x, y)
+
         val geometryFactory = new GeometryFactory(new PrecisionModel(), srid)
         val gridPolys = coords.flatMap { case (x, y) => 
             val envelope = new Envelope(x, x + 20, y, y + 20)
