@@ -2,7 +2,7 @@ name := "vector-spark"
 version := "0.1"
 scalaVersion := "2.12.17"
 
-val SparkVersion = "3.3.1"
+val SparkVersion = "3.3.2"
 val SparkCompatibleVersion = "3.0"
 val HadoopVersion = "3.2.2"
 val SedonaVersion = "1.4.0"
